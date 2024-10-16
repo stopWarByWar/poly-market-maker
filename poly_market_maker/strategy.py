@@ -61,6 +61,7 @@ class StrategyManager:
         token_prices,success = self.get_token_prices()
         if not success:
             self.logger.error("fail to get price from oracle")
+            self.cancel_order(orderbook)
             return
         
         
