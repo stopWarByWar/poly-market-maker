@@ -48,7 +48,7 @@ class ClobApi:
     def get_exchange(self, neg_risk = False):
         return self.client.get_exchange_address(neg_risk)
 
-    def get_price(self, token_id: int) -> float:
+    def get_price(self, token_id: int):
         """
         Get the current price on the orderbook
         """
@@ -60,14 +60,14 @@ class ClobApi:
                 (time.time() - start_time)
             )
             if resp.get("mid") is not None:
-                return float(resp.get("mid"))
+                return float(resp.get("mid")),True
         except Exception as e:
             self.logger.error(f"Error fetching current price from the CLOB API: {e}")
             clob_requests_latency.labels(method="get_midpoint", status="error").observe(
                 (time.time() - start_time)
             )
 
-        return self._rand_price()
+        return self._rand_price(),False
 
     def _rand_price(self) -> float:
         price = randomize_default_price(DEFAULT_PRICE)

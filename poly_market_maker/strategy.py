@@ -58,7 +58,12 @@ class StrategyManager:
             self.logger.error(f"{e}")
             return
 
-        token_prices = self.get_token_prices()
+        token_prices,success = self.get_token_prices()
+        if not success:
+            self.logger.error("fail to get price from oracle")
+            return
+        
+        
         self.logger.debug(f"{token_prices}")
         (orders_to_cancel, orders_to_place) = self.strategy.get_orders(
             orderbook, token_prices
@@ -86,12 +91,13 @@ class StrategyManager:
         return orderbook
 
     def get_token_prices(self):
+        price, success = self.price_feed.get_price(Token.A)
         price_a = round(
-            self.price_feed.get_price(Token.A),
+            price,
             MAX_DECIMALS,
         )
         price_b = round(1 - price_a, MAX_DECIMALS)
-        return {Token.A: price_a, Token.B: price_b}
+        return {Token.A: price_a, Token.B: price_b},success
 
     def cancel_orders(self, orders_to_cancel):
         if len(orders_to_cancel) > 0:
